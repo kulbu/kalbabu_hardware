@@ -1,0 +1,12 @@
+<launch>
+  <arg name="ns" default="/kulbabu"/>
+
+  <group ns="$(arg ns)">
+
+    <!-- Load Ultrasonic Array -->
+    <node name="kulbabu_hardware_ultrasonic" pkg="kulbabu_hardware" type="kulbabu_hardware_ultrasonic"
+          output="screen" />
+
+  </group>
+
+</launch>
