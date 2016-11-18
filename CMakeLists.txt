@@ -6,6 +6,7 @@ project(kulbabu_hardware)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
+        message_generation
 	sensor_msgs
 )
 
@@ -45,11 +46,11 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+#add_message_files(
+#  FILES
+#  Message1.msg
+#  Message2.msg
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
