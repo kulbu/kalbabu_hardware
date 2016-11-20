@@ -67,10 +67,10 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-	DEPENDENCIES
-	sensor_msgs  # Or other packages containing msgs
-)
+#generate_messages(
+#	DEPENDENCIES
+#	sensor_msgs  # Or other packages containing msgs
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -87,6 +87,8 @@ catkin_package(
   LIBRARIES
   CATKIN_DEPENDS
 		roscpp
+                message_runtime
+                sensor_msgs
 #  DEPENDS system_lib
 )
 
