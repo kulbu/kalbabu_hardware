@@ -19,7 +19,13 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "kulbabu_hardware_ultrasonic");
   ros::NodeHandle nh;
 
-  ros::Publisher range_pub = nh.advertise<sensor_msgs::Range>("range", 50);
+  ros::Publisher range_pubs[8]; 
+
+  for (uint8_t x=0;x<8;x++) {	
+    char name[10];
+    sprintf(name, "range%d", x);
+    range_pubs[x] = nh.advertise<sensor_msgs::Range>(name, 50);
+  }
 
   // Setup i2c
   int file;
@@ -63,9 +69,6 @@ int main(int argc, char** argv) {
       /* ERROR HANDLING: i2c transaction failed */
       ROS_WARN_STREAM( "I2C failed " << buf );
     } else {
-      /* res contains the read word */
-      ROS_INFO_STREAM( "I2C read " << buf );
-
       // https://github.com/ros/common_msgs/blob/indigo-devel/sensor_msgs/msg/Range.msg
       sensor_msgs::Range range_msg;
       range_msg.header.stamp = current_time;
@@ -80,7 +83,8 @@ int main(int argc, char** argv) {
         sprintf(name, "range%d", x);
         range_msg.header.frame_id = name;
         range_msg.range = buf[x];
-        range_pub.publish(range_msg);
+        ROS_INFO( "I2C read %d", buf[x] );
+        range_pubs[x].publish(range_msg);
       }
     }
 
