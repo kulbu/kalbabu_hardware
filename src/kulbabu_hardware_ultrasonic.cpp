@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     //if (res < 0) {
 
 
-    char buf[10];
+    uint8_t buf[8];
     buf[0] = addr;
 
     if (read(file, buf, 1) != 1) {
@@ -82,8 +82,8 @@ int main(int argc, char** argv) {
         char name[10];
         sprintf(name, "range%d", x);
         range_msg.header.frame_id = name;
-        range_msg.range = buf[x];
-        ROS_INFO( "I2C read %d", buf[x] );
+        range_msg.range = (float)buf[x];
+        ROS_INFO( "I2C read %s %d", name, buf[x] );
         range_pubs[x].publish(range_msg);
       }
     }
