@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     uint8_t buf[8];
     buf[0] = addr;
 
-    if (read(file, buf, 1) != 1) {
+    if (read(file, buf, sizeof(buf)) != sizeof(buf)) {
       /* ERROR HANDLING: i2c transaction failed */
       ROS_WARN_STREAM( "I2C failed " << buf );
     } else {
