@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 
       for (uint8_t x=0;x<8;x++) {
         char name[25];
-	    sprintf(name, "%s%d", topic, x);
+	    sprintf(name, "%s%d_link", topic, x);
         range_msg.header.frame_id = name;
         range_msg.range = (((float)buf[x])*CM_PER_IT)/100;
         ROS_INFO( "I2C read %s %d", name, buf[x] );
