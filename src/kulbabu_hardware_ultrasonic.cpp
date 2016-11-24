@@ -15,6 +15,8 @@
 #include <sensor_msgs/Range.h>
 #include <linux/i2c-dev.h>
 
+#define CM_PER_IT       1.5
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "kulbabu_hardware_ultrasonic");
   ros::NodeHandle nh;
@@ -34,10 +36,6 @@ int main(int argc, char** argv) {
 
   char topic[24];
   strcpy(topic, topic_name.c_str());
-
-  ROS_INFO( "Topic: %s", topic );
-  ROS_INFO( "Adapter: %d", i2c_adapter );
-  ROS_INFO( "Address: %d", i2c_address );
 
   ros::Publisher range_pubs[8];
 
@@ -94,7 +92,7 @@ int main(int argc, char** argv) {
         char name[25];
 	    sprintf(name, "%s%d", topic, x);
         range_msg.header.frame_id = name;
-        range_msg.range = (float)buf[x];
+        range_msg.range = (((float)buf[x])*CM_PER_IT)/100;
         ROS_INFO( "I2C read %s %d", name, buf[x] );
         range_pubs[x].publish(range_msg);
       }
