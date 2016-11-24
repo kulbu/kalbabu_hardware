@@ -18,24 +18,32 @@
 int main(int argc, char** argv) {
   ros::init(argc, argv, "kulbabu_hardware_ultrasonic");
   ros::NodeHandle nh;
+  ros::NodeHandle ph("~");
 
   std::string topic_name;
-  std::int i2c_adapter, i2c_address;
-  std::double field_of_view, max_range, min_range, publish_frequency;
+  int i2c_adapter, i2c_address;
+  double field_of_view, max_range, min_range, publish_frequency;
 
-  nh.param<std::string>("topic_name", topic_name, "range");
-  nh.param<std::int>("i2c_adapter", i2c_adapter, 1);
-  nh.param<std::int>("i2c_address", i2c_address, 0x10);
-  nh.param<std::double>("field_of_view", field_of_view, 0.261799388); // 15deg in rad (HCSR04)
-  nh.param<std::double>("max_range", max_range, 4.00);
-  nh.param<std::double>("min_range", min_range, 0.02);
-  nh.param<std::double>("publish_frequency", publish_frequency, 10.0);
+  ph.param<std::string>("topic_name", topic_name, "range");
+  ph.param<int>("i2c_adapter", i2c_adapter, 1);
+  ph.param<int>("i2c_address", i2c_address, 0x10);
+  ph.param<double>("field_of_view", field_of_view, 0.261799388); // 15deg in rad (HCSR04)
+  ph.param<double>("max_range", max_range, 4.00);
+  ph.param<double>("min_range", min_range, 0.02);
+  ph.param<double>("publish_frequency", publish_frequency, 10.0);
+
+  char topic[24];
+  strcpy(topic, topic_name.c_str());
+
+  ROS_INFO( "Topic: %s", topic );
+  ROS_INFO( "Adapter: %d", i2c_adapter );
+  ROS_INFO( "Address: %d", i2c_address );
 
   ros::Publisher range_pubs[8];
 
   for (uint8_t x=0;x<8;x++) {
-    char name[10];
-    sprintf(name, "%s%d", topic_name, x);
+    char name[25];
+    sprintf(name, "%s%d", topic, x);
     range_pubs[x] = nh.advertise<sensor_msgs::Range>(name, 50);
   }
 
@@ -83,8 +91,8 @@ int main(int argc, char** argv) {
       range_msg.min_range = min_range;
 
       for (uint8_t x=0;x<8;x++) {
-        char name[10];
-        sprintf(name, "%s%d", topic_name, x);
+        char name[25];
+	    sprintf(name, "%s%d", topic, x);
         range_msg.header.frame_id = name;
         range_msg.range = (float)buf[x];
         ROS_INFO( "I2C read %s %d", name, buf[x] );

@@ -7,10 +7,10 @@
     <node name="kulbabu_hardware_ultrasonic" pkg="kulbabu_hardware" type="kulbabu_hardware_ultrasonic"
           output="screen">
 
-      <param name="topic_name" type="string" value="tnge"/>
+      <param name="topic_name" type="string" value="range"/>
 
       <param name="i2c_adapter" type="int" value="1"/>
-      <param name="i2c_address" type="int" value="10"/>
+      <param name="i2c_address" type="int" value="16"/>
 
       <param name="field_of_view" type="double" value="0.261799388"/>
       <param name="max_range" type="double" value="4.00"/>
