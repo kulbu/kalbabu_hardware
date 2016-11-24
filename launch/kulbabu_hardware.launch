@@ -1,0 +1,24 @@
+<launch>
+  <arg name="ns" default="/kulbabu"/>
+
+  <group ns="$(arg ns)">
+
+    <!-- Load Ultrasonic Array -->
+    <node name="kulbabu_hardware_ultrasonic" pkg="kulbabu_hardware" type="kulbabu_hardware_ultrasonic"
+          output="screen">
+
+      <param name="topic_name" type="string" value="range"/>
+
+      <param name="i2c_adapter" type="int" value="1"/>
+      <param name="i2c_address" type="double" value="0x10"/>
+
+      <param name="field_of_view" type="double" value="0.261799388"/>
+      <param name="max_range" type="double" value="4.00"/>
+      <param name="min_range" type="double" value="0.02"/>
+      <param name="publish_frequency" type="double" value="10.0"/>
+
+    </node>
+
+  </group>
+
+</launch>
