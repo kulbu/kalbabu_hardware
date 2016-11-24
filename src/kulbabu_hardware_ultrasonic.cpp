@@ -19,6 +19,10 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "kulbabu_hardware_ultrasonic");
   ros::NodeHandle nh;
 
+  std::string topic_name;
+  std::int i2c_adapter, i2c_address;
+  std::double field_of_view, max_range, min_range, publish_frequency;
+
   nh.param<std::string>("topic_name", topic_name, "range");
   nh.param<std::int>("i2c_adapter", i2c_adapter, 1);
   nh.param<std::int>("i2c_address", i2c_address, 0x10);
