@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 	    sprintf(name, "%s%d_link", topic, x);
         range_msg.header.frame_id = name;
         range_msg.range = (((float)buf[x])*CM_PER_IT)/100;
-        ROS_INFO( "I2C read %s %d", name, buf[x] );
+        ROS_DEBUG( "I2C read %s %d", name, buf[x] );
         range_pubs[x].publish(range_msg);
       }
     }
