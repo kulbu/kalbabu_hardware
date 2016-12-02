@@ -13,6 +13,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   trajectory_msgs
   actionlib
+  urdf
+  joint_limits_interface
+  transmission_interface
 )
 
 ## System dependencies are found with CMake's conventions
@@ -100,6 +103,9 @@ catkin_package(
     control_msgs
     sensor_msgs
     trajectory_msgs
+    urdf
+    joint_limits_interface
+    transmission_interface
   DEPENDS system_lib
 )
 

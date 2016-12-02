@@ -1,7 +1,6 @@
 /**
  * Based on: https://github.com/davetcoleman/ros_control_boilerplate
  */
-
 #include <kulbabu_hardware/kulbabu_hardware_control_loop.h>
 
 int main(int argc, char** argv) {

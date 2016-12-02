@@ -1,8 +1,6 @@
 /**
  * Based on: https://github.com/davetcoleman/ros_control_boilerplate
  */
-
-
 #include <kulbabu_hardware/kulbabu_hardware_control_loop.h>
 
 // ROS parameter loading
@@ -18,9 +16,10 @@ KulbabuHardwareControlLoop::KulbabuHardwareControlLoop(
   controller_manager_.reset(new controller_manager::ControllerManager(hardware_interface_.get(), nh_));
 
   // Load rosparams
-  ros::NodeHandle rpsnh(nh, name_);
-  nh_.param<int>("loop_hz", loop_hz_, 10);
-  nh_.param<int>("cycle_time_error_threshold", cycle_time_error_threshold_, 10);
+  //ros::NodeHandle rpsnh(nh, name_);
+  ros::NodeHandle ph("~");
+  ph.param<int>("loop_hz", loop_hz_, 10);
+  ph.param<int>("cycle_time_error_threshold", cycle_time_error_threshold_, 10);
   /*
   std::size_t error = 0;
   error += !rosparam_shortcuts::get(name_, rpsnh, "loop_hz", loop_hz_);
