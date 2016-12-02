@@ -1,404 +1,340 @@
 /**
  * Based on: https://github.com/davetcoleman/ros_control_boilerplate
  */
-
-#include <kulbabu_hardware/kulbabu_hardware_interface.h>
-#include <fcntl.h>
-
-#define SYSFS_GPIO_DIR  "/sys/class/gpio"
-#define SYSFS_PWM_DIR   "/sys/devices/platform/pwm-ctrl"
-#define MAX_BUF 256
-
-// FIXME: Encapsulate this IO code.
-int pwm_enable(unsigned int pwm, bool enable) {
-  int fd;
-  char buf[MAX_BUF];
-
-  // First check current value, only update if changed.
-  char curr[11];
-  int status;
-  snprintf(buf, sizeof(buf), SYSFS_PWM_DIR  "/enable%d", pwm);
-  fd = open(buf, sizeof(buf), O_RDONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "pwm/enable/read");
-    return fd;
-  }
-  read(fd, curr, sizeof(curr));
-  close(fd);
-
-  // "On" always ends with an "n". Quick and dirty.
-  status = (curr[strlen(curr)-2] == 'n');
-
-  if (status != enable) {
-    ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-       "Chan: " << pwm << " Enable: " << enable);
-
-    snprintf(buf, sizeof(buf), SYSFS_PWM_DIR  "/enable%d", pwm);
-    fd = open(buf, O_WRONLY);
-    if (fd < 0) {
-      ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-        "pwm/enable/write");
-      return fd;
-    }
-
-    if (enable)
-      write(fd, "1", 2);
-    else
-      write(fd, "0", 2);
-
-    close(fd);
-  }
-  return 0;
-}
-
-int pwm_freq(unsigned int pwm, unsigned int freq) {
-  int fd;
-  char buf[MAX_BUF];
-
-  // First check current value, only update if changed.
-  char curr[11];
-  int status;
-  snprintf(buf, sizeof(buf), SYSFS_PWM_DIR  "/freq%d", pwm);
-  fd = open(buf, sizeof(buf), O_RDONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "pwm/freq/read");
-    return fd;
-  }
-  read(fd, curr, sizeof(curr));
-  close(fd);
-
-  if (atoi(curr) != freq && freq >= 1) {
-    ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-       "Chan: " << pwm << " Freq: " << freq);
-
-    snprintf(buf, sizeof(buf), SYSFS_PWM_DIR  "/freq%d", pwm);
-    fd = open(buf, O_WRONLY);
-    if (fd < 0) {
-      ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-        "pwm/freq/write");
-      return fd;
-    }
-
-    int len = snprintf(buf, sizeof(buf), "%d", freq);
-    write(fd, buf, len);
-    close(fd);
-  }
-  return 0;
-}
-
-int pwm_duty(unsigned int pwm, unsigned int duty) {
-  int fd;
-  char buf[MAX_BUF];
-
-  ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-     "Chan: " << pwm << " Duty: " << duty);
-
-  snprintf(buf, sizeof(buf), SYSFS_PWM_DIR  "/duty%d", pwm);
-  fd = open(buf, O_WRONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "pwm/duty/write");
-    return fd;
-  }
-
-  int len = snprintf(buf, sizeof(buf), "%d", duty);
-  write(fd, buf, len);
-  close(fd);
-
-  return 0;
-}
-
-/*
-int gpio_own(char *file) {
-  uid_t uid = getuid();
-  uid_t gid = getgid();
-
-  if (chown (file, uid, gid) != 0) {
-    if (errno == ENOENT) {
-      ROS_WARN_STREAM_NAMED("kulbabu_hardware_interface",
-        "gpio/own File does not exist");
-    } else {
-      ROS_FATAL_STREAM_NAMED("kulbabu_hardware_interface",
-        "gpio/own Unable to change ownership "
-        << file << " Error: " << strerror (errno));
-      exit (1) ;
-    }
-  }
-
-}
-
-int gpio_export(unsigned int gpio) {
-  int fd;
-  char buf[MAX_BUF];
-
-  ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-     "Export: " << gpio);
-
-  fd = open(SYSFS_GPIO_DIR "/export", O_WRONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "gpio/export");
-    return fd;
-  }
-
-  int len = snprintf(buf, sizeof(buf), "%d", gpio);
-  write(fd, buf, len);
-  close(fd);
-
-  snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-  gpio_own(buf);
-
-  snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/edge", gpio);
-  gpio_own(buf);
-
- return 0;
-}
-
-int gpio_dir(unsigned int gpio, bool output) {
-  int fd;
-  char buf[MAX_BUF];
-
-  ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-     "Dir: " << gpio << " Output: " << output);
-
-  snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/direction", gpio);
-  fd = open(buf, O_WRONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "gpio/direction");
-    return fd;
-  }
-
-  if (output)
-    write(fd, "out", 2);
-  else
-    write(fd, "in", 2);
-
-  close(fd);
-
-  snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/direction", gpio);
-  gpio_own(buf);
-
-  return 0;
-}
-*/
-
-int gpio_set(unsigned int gpio, unsigned int value) {
-  int fd;
-  char buf[MAX_BUF];
-
-  ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-     "GPIO: " << gpio << " Value: " << value);
-
-  snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-  fd = open(buf, O_WRONLY);
-  if (fd < 0) {
-    ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-      "gpio/set-value");
-    return fd;
-  }
-
-  if (value)
-    write(fd, "1", 2);
-  else
-    write(fd, "0", 2);
-
-  close(fd);
-  return 0;
-}
-
-namespace kulbabu_hardware {
-
-KulbabuHardwareInterface::KulbabuHardwareInterface(
-  ros::NodeHandle& nh,
-  int joint_mode)
-  : nh_(nh),
-  joint_mode_(joint_mode) {
-  // Initialize shared memory and interfaces here
-  init();  // this implementation loads from rosparam
-
-  ROS_INFO_NAMED("kulbabu_hardware_interface",
-    "Loaded kulbabu_hardware_interface.");
-}
-
-void KulbabuHardwareInterface::init() {
-  ROS_INFO_STREAM_NAMED("kulbabu_hardware_interface",
-    "Reading rosparams from namespace: " << nh_.getNamespace());
-
-  nh_.getParam("hardware_interface/steps_per_m", steps_per_m_);
-  if (!steps_per_m_ > 0) {
-    ROS_FATAL_STREAM_NAMED("kulbabu_hardware_interface",
-      "No step per metre found on parameter server."
-        << " Namespace: " << nh_.getNamespace());
-    exit(-1);
-  }
-
-  // Get joint names
-  nh_.getParam("hardware_interface/joints", joint_names_);
-  if (joint_names_.size() == 0) {
-    ROS_FATAL_STREAM_NAMED("kulbabu_hardware_interface",
-      "No joints found on parameter server"
-        << " Namespace: " << nh_.getNamespace());
-    exit(-1);
-  }
-  num_joints_ = joint_names_.size();
-
-  // Get direction GPIO pins; 0 = forward, 1 = reverse.
-  nh_.getParam("hardware_interface/dirs", pin_dirs_);
-  if (pin_dirs_.size() == 0) {
-    ROS_FATAL_STREAM_NAMED("kulbabu_hardware_interface",
-      "No GPIO direction pins found on parameter server."
-        << " Namespace: " << nh_.getNamespace());
-    exit(-1);
-  }
-
-  // Get PWM sysfs indexes.
-  nh_.getParam("hardware_interface/steps", pin_steps_);
-  if (pin_steps_.size() == 0) {
-    ROS_FATAL_STREAM_NAMED("kulbabu_hardware_interface",
-      "No GPIO step pins found on parameter server."
-        << " Namespace: " << nh_.getNamespace());
-    exit(-1);
-  }
-
-  // Resize vectors
-  joint_position_.resize(num_joints_);
-  joint_velocity_.resize(num_joints_);
-  joint_effort_.resize(num_joints_);
-  joint_position_command_.resize(num_joints_);
-  joint_velocity_command_.resize(num_joints_);
-  joint_effort_command_.resize(num_joints_);
-
-  // Initialize controller
-  for (std::size_t i = 0; i < num_joints_; ++i) {
-    ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-      "Loading joint name: " << joint_names_[i]);
-
-    // Export GPIO pin for output.
-    // FIXME: Permission denied? Manual export `gpio export 88 out`
-    // gpio_export(pin_dirs_[i]);
-    // gpio_dir(pin_dirs_[i], 1);
-
-    // Start with PWM turned off and 50/50 duty cycle.
-    pwm_enable(pin_steps_[i], 0);
-    pwm_duty(pin_steps_[i], 512);
-
-    // Set direction pins to forward by default.
-    gpio_set(pin_dirs_[i], 0);
-
-    // Create joint state interface
-    joint_state_interface_.registerHandle(hardware_interface::JointStateHandle(
-      joint_names_[i],
-      &joint_position_[i],
-      &joint_velocity_[i],
-      &joint_effort_[i]));
-
-    switch (joint_mode_) {
-      case 0:
-        // Create position joint interface
-        position_joint_interface_
-          .registerHandle(hardware_interface::JointHandle(
-            joint_state_interface_.getHandle(
-              joint_names_[i]),
-              &joint_position_command_[i]));
-        break;
-      case 1:
-        // Create velocity joint interface
-        velocity_joint_interface_
-          .registerHandle(hardware_interface::JointHandle(
-            joint_state_interface_.getHandle(
-              joint_names_[i]),
-              &joint_velocity_command_[i]));
-        break;
-      case 2:
-        // Create effort joint interface
-        effort_joint_interface_
-          .registerHandle(hardware_interface::JointHandle(
-            joint_state_interface_.getHandle(
-              joint_names_[i]),
-              &joint_effort_command_[i]));
-        break;
-    }
-  }
-
-  registerInterface(&joint_state_interface_);  // From RobotHW base class.
-  registerInterface(&position_joint_interface_);  // From RobotHW base class.
-  registerInterface(&velocity_joint_interface_);  // From RobotHW base class.
-  registerInterface(&effort_joint_interface_);  // From RobotHW base class.
-}
-
-void KulbabuHardwareInterface::read(ros::Duration elapsed_time) {
-  // TODO: Optical encoders.
-
-  // Read the joint states from your hardware here
-  // e.g.
-  // for (std::size_t i = 0; i < num_joints_; ++i)
-  // {
-  //   joint_position_[i] = robot_api_.getJointPosition(i);
-  //   joint_velocity_[i] = robot_api_.getJointVelocity(i);
-  //   joint_effort_[i] = robot_api_.getJointEffort(i);
-  // }
-}
-
-void KulbabuHardwareInterface::write(ros::Duration elapsed_time) {
-  int freq = 0;
-  int dir = 0;
-
-  // Send commands in different modes
-  for (std::size_t i = 0; i < num_joints_; ++i) {
-    // Skip joints with no pins defined
-    if (pin_dirs_[i] == -1 || pin_steps_[i] == -1) continue;
-
-    switch (joint_mode_) {
-      case 1:  // hardware_interface::MODE_VELOCITY:
-        // Calc PWM frequency.
-        freq = joint_velocity_command_[i] * steps_per_m_;
-
-       // DEBUG: instantly adding velocity to state
-        joint_velocity_[i] = joint_velocity_command_[i];
-
-        // Reverse flips direction.
-        if (freq < 0) {
-          freq = abs(freq);
-          dir = 1;
-        } else {
-          dir = 0;
-        }
-
-        // Disable PWM when stopped.
-        if (freq < 1) {
-          freq = 0;
-          pwm_enable(pin_steps_[i], 0);
-        } else {
-          pwm_enable(pin_steps_[i], 1);
-        }
-
-        // Set direction pin.
-        gpio_set(pin_dirs_[i], dir);
-
-        // Set PWM frequency.
-        pwm_freq(pin_steps_[i], freq);
-
-        ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
-          "\ni: "     << i <<
-          "\ncmd: "   << joint_velocity_command_[i] <<
-          "\ndist: "  << steps_per_m_ <<
-          "\nfreq: "  << freq <<
-          "\ndir: "   << dir <<
-          "\njoint: " << joint_names_[i] <<
-          "\ndir: "   << pin_dirs_[i] <<
-          "\nstep: "  << pin_steps_[i]);
-        break;
-
-      default:
-        ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
-          "Joint mode not implemented");
-        break;
-    }
-  }
-}
-
-
-}  // namespace kulbabu_hardware
+ #include <kulbabu_hardware/kulbabu_hardware_interface.h>
+ #include <limits>
+
+ // ROS parameter loading
+ //#include <rosparam_shortcuts/rosparam_shortcuts.h>
+
+ namespace kulbabu_hardware
+ {
+ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Model *urdf_model)
+   : name_("kulbabu_hardware_interface")
+   , nh_(nh)
+   , use_rosparam_joint_limits_(false)
+   , use_soft_limits_if_available_(false)
+ {
+   // Check if the URDF model needs to be loaded
+   if (urdf_model == NULL)
+     loadURDF(nh, "robot_description");
+   else
+     urdf_model_ = urdf_model;
+
+   // Load rosparams
+   ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
+   nh_.param<int>("joints", joint_names_, []);
+   /*
+   std::size_t error = 0;
+   error += !rosparam_shortcuts::get(name_, rpnh, "joints", joint_names_);
+   rosparam_shortcuts::shutdownIfError(name_, error);
+   */
+ }
+
+ void KulbabuHardwareInterface::init()
+ {
+   num_joints_ = joint_names_.size();
+
+   // Status
+   joint_position_.resize(num_joints_, 0.0);
+   joint_velocity_.resize(num_joints_, 0.0);
+   joint_effort_.resize(num_joints_, 0.0);
+
+   // Command
+   joint_position_command_.resize(num_joints_, 0.0);
+   joint_velocity_command_.resize(num_joints_, 0.0);
+   joint_effort_command_.resize(num_joints_, 0.0);
+
+   // Limits
+   joint_position_lower_limits_.resize(num_joints_, 0.0);
+   joint_position_upper_limits_.resize(num_joints_, 0.0);
+   joint_velocity_limits_.resize(num_joints_, 0.0);
+   joint_effort_limits_.resize(num_joints_, 0.0);
+
+   // Initialize interfaces for each joint
+   for (std::size_t joint_id = 0; joint_id < num_joints_; ++joint_id)
+   {
+     ROS_DEBUG_STREAM_NAMED(name_, "Loading joint name: " << joint_names_[joint_id]);
+
+     // Create joint state interface
+     joint_state_interface_.registerHandle(hardware_interface::JointStateHandle(
+         joint_names_[joint_id], &joint_position_[joint_id], &joint_velocity_[joint_id], &joint_effort_[joint_id]));
+
+     // Add command interfaces to joints
+     // TODO: decide based on transmissions?
+     hardware_interface::JointHandle joint_handle_position = hardware_interface::JointHandle(
+         joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_position_command_[joint_id]);
+     position_joint_interface_.registerHandle(joint_handle_position);
+
+     hardware_interface::JointHandle joint_handle_velocity = hardware_interface::JointHandle(
+         joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_velocity_command_[joint_id]);
+     velocity_joint_interface_.registerHandle(joint_handle_velocity);
+
+     hardware_interface::JointHandle joint_handle_effort = hardware_interface::JointHandle(
+         joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_effort_command_[joint_id]);
+     effort_joint_interface_.registerHandle(joint_handle_effort);
+
+     // Load the joint limits
+     registerJointLimits(joint_handle_position, joint_handle_velocity, joint_handle_effort, joint_id);
+   }  // end for each joint
+
+   registerInterface(&joint_state_interface_);     // From RobotHW base class.
+   registerInterface(&position_joint_interface_);  // From RobotHW base class.
+   registerInterface(&velocity_joint_interface_);  // From RobotHW base class.
+   registerInterface(&effort_joint_interface_);    // From RobotHW base class.
+
+   ROS_INFO_STREAM_NAMED(name_, "KulbabuHardwareInterface Ready.");
+ }
+
+ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::JointHandle &joint_handle_position,
+                                              const hardware_interface::JointHandle &joint_handle_velocity,
+                                              const hardware_interface::JointHandle &joint_handle_effort,
+                                              std::size_t joint_id)
+ {
+   // Default values
+   joint_position_lower_limits_[joint_id] = -std::numeric_limits<double>::max();
+   joint_position_upper_limits_[joint_id] = std::numeric_limits<double>::max();
+   joint_velocity_limits_[joint_id] = std::numeric_limits<double>::max();
+   joint_effort_limits_[joint_id] = std::numeric_limits<double>::max();
+
+   // Limits datastructures
+   joint_limits_interface::JointLimits joint_limits;     // Position
+   joint_limits_interface::SoftJointLimits soft_limits;  // Soft Position
+   bool has_joint_limits = false;
+   bool has_soft_limits = false;
+
+   // Get limits from URDF
+   if (urdf_model_ == NULL)
+   {
+     ROS_WARN_STREAM_NAMED(name_, "No URDF model loaded, unable to get joint limits");
+     return;
+   }
+
+   // Get limits from URDF
+   const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model_->getJoint(joint_names_[joint_id]);
+
+   // Get main joint limits
+   if (urdf_joint == NULL)
+   {
+     ROS_ERROR_STREAM_NAMED(name_, "URDF joint not found " << joint_names_[joint_id]);
+     return;
+   }
+
+   // Get limits from URDF
+   if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits))
+   {
+     has_joint_limits = true;
+     ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF position limits ["
+                                                             << joint_limits.min_position << ", "
+                                                             << joint_limits.max_position << "]");
+     if (joint_limits.has_velocity_limits)
+       ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF velocity limit ["
+                                                               << joint_limits.max_velocity << "]");
+   }
+   else
+   {
+     if (urdf_joint->type != urdf::Joint::CONTINUOUS)
+       ROS_WARN_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " does not have a URDF "
+                             "position limit");
+   }
+
+   // Get limits from ROS param
+   if (use_rosparam_joint_limits_)
+   {
+     if (joint_limits_interface::getJointLimits(joint_names_[joint_id], nh_, joint_limits))
+     {
+       has_joint_limits = true;
+       ROS_DEBUG_STREAM_NAMED(name_,
+                              "Joint " << joint_names_[joint_id] << " has rosparam position limits ["
+                                       << joint_limits.min_position << ", " << joint_limits.max_position << "]");
+       if (joint_limits.has_velocity_limits)
+         ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
+                                                                 << " has rosparam velocity limit ["
+                                                                 << joint_limits.max_velocity << "]");
+     }  // the else debug message provided internally by joint_limits_interface
+   }
+
+   // Get soft limits from URDF
+   if (use_soft_limits_if_available_)
+   {
+     if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits))
+     {
+       has_soft_limits = true;
+       ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has soft joint limits.");
+     }
+     else
+     {
+       ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " does not have soft joint "
+                              "limits");
+     }
+   }
+
+   // Quit we we haven't found any limits in URDF or rosparam server
+   if (!has_joint_limits)
+   {
+     return;
+   }
+
+   // Copy position limits if available
+   if (joint_limits.has_position_limits)
+   {
+     // Slighly reduce the joint limits to prevent floating point errors
+     joint_limits.min_position += std::numeric_limits<double>::epsilon();
+     joint_limits.max_position -= std::numeric_limits<double>::epsilon();
+
+     joint_position_lower_limits_[joint_id] = joint_limits.min_position;
+     joint_position_upper_limits_[joint_id] = joint_limits.max_position;
+   }
+
+   // Copy velocity limits if available
+   if (joint_limits.has_velocity_limits)
+   {
+     joint_velocity_limits_[joint_id] = joint_limits.max_velocity;
+   }
+
+   // Copy effort limits if available
+   if (joint_limits.has_effort_limits)
+   {
+     joint_effort_limits_[joint_id] = joint_limits.max_effort;
+   }
+
+   if (has_soft_limits)  // Use soft limits
+   {
+     ROS_DEBUG_STREAM_NAMED(name_, "Using soft saturation limits");
+     const joint_limits_interface::PositionJointSoftLimitsHandle soft_handle_position(joint_handle_position,
+                                                                                        joint_limits, soft_limits);
+     pos_jnt_soft_limits_.registerHandle(soft_handle_position);
+     const joint_limits_interface::VelocityJointSoftLimitsHandle soft_handle_velocity(joint_handle_velocity,
+                                                                                        joint_limits, soft_limits);
+     vel_jnt_soft_limits_.registerHandle(soft_handle_velocity);
+     const joint_limits_interface::EffortJointSoftLimitsHandle soft_handle_effort(joint_handle_effort, joint_limits,
+                                                                                    soft_limits);
+     eff_jnt_soft_limits_.registerHandle(soft_handle_effort);
+   }
+   else  // Use saturation limits
+   {
+     ROS_DEBUG_STREAM_NAMED(name_, "Using saturation limits (not soft limits)");
+
+     const joint_limits_interface::PositionJointSaturationHandle sat_handle_position(joint_handle_position, joint_limits);
+     pos_jnt_sat_interface_.registerHandle(sat_handle_position);
+
+     const joint_limits_interface::VelocityJointSaturationHandle sat_handle_velocity(joint_handle_velocity, joint_limits);
+     vel_jnt_sat_interface_.registerHandle(sat_handle_velocity);
+
+     const joint_limits_interface::EffortJointSaturationHandle sat_handle_effort(joint_handle_effort, joint_limits);
+     eff_jnt_sat_interface_.registerHandle(sat_handle_effort);
+   }
+ }
+
+ void KulbabuHardwareInterface::reset()
+ {
+   // Reset joint limits state, in case of mode switch or e-stop
+   pos_jnt_sat_interface_.reset();
+   pos_jnt_soft_limits_.reset();
+ }
+
+ void KulbabuHardwareInterface::printState()
+ {
+   // WARNING: THIS IS NOT REALTIME SAFE
+   // FOR DEBUGGING ONLY, USE AT YOUR OWN ROBOT's RISK!
+   ROS_INFO_STREAM_THROTTLE(1, std::endl
+                                   << printStateHelper());
+ }
+
+ std::string KulbabuHardwareInterface::printStateHelper()
+ {
+   std::stringstream ss;
+   std::cout.precision(15);
+
+   for (std::size_t i = 0; i < num_joints_; ++i)
+   {
+     ss << "j" << i << ": " << std::fixed << joint_position_[i] << "\t ";
+     ss << std::fixed << joint_velocity_[i] << "\t ";
+     ss << std::fixed << joint_effort_[i] << std::endl;
+   }
+   return ss.str();
+ }
+
+ std::string KulbabuHardwareInterface::printCommandHelper()
+ {
+   std::stringstream ss;
+   std::cout.precision(15);
+   ss << "    position     velocity         effort  \n";
+   for (std::size_t i = 0; i < num_joints_; ++i)
+   {
+     ss << "j" << i << ": " << std::fixed << joint_position_command_[i] << "\t ";
+     ss << std::fixed << joint_velocity_command_[i] << "\t ";
+     ss << std::fixed << joint_effort_command_[i] << std::endl;
+   }
+   return ss.str();
+ }
+
+ void KulbabuHardwareInterface::loadURDF(ros::NodeHandle &nh, std::string param_name)
+ {
+   std::string urdf_string;
+   urdf_model_ = new urdf::Model();
+
+   // search and wait for robot_description on param server
+   while (urdf_string.empty() && ros::ok())
+   {
+     std::string search_param_name;
+     if (nh.searchParam(param_name, search_param_name))
+     {
+       ROS_INFO_STREAM_NAMED(name_, "Waiting for model URDF on the ROS param server at location: " <<
+                             nh.getNamespace() << search_param_name);
+       nh.getParam(search_param_name, urdf_string);
+     }
+     else
+     {
+       ROS_INFO_STREAM_NAMED(name_, "Waiting for model URDF on the ROS param server at location: " <<
+                             nh.getNamespace() << param_name);
+       nh.getParam(param_name, urdf_string);
+     }
+
+     usleep(100000);
+   }
+
+   if (!urdf_model_->initString(urdf_string))
+     ROS_ERROR_STREAM_NAMED(name_, "Unable to load URDF model");
+   else
+     ROS_DEBUG_STREAM_NAMED(name_, "Received URDF from param server");
+ }
+
+ void KulbabuHardwareInterface::read(ros::Duration elapsed_time) {
+   // TODO: Optical encoders.
+
+   // Read the joint states from your hardware here
+   // e.g.
+   // for (std::size_t i = 0; i < num_joints_; ++i)
+   // {
+   //   joint_position_[i] = robot_api_.getJointPosition(i);
+   //   joint_velocity_[i] = robot_api_.getJointVelocity(i);
+   //   joint_effort_[i] = robot_api_.getJointEffort(i);
+   // }
+ }
+
+ void KulbabuHardwareInterface::write(ros::Duration elapsed_time) {
+
+   // Send commands in different modes
+   for (std::size_t i = 0; i < num_joints_; ++i)
+   {
+
+     switch (joint_mode_) {
+       case 1:  // hardware_interface::MODE_VELOCITY:
+         joint_velocity_[i] = joint_velocity_command_[i];
+
+         ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
+           "\ni: "     << i <<
+           "\ncmd: "   << joint_velocity_command_[i] <<
+           "\njoint: " << joint_names_[i]);
+         break;
+
+       default:
+         ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
+           "Joint mode not implemented");
+         break;
+     }
+   }
+ }
+
+ }  // namespace

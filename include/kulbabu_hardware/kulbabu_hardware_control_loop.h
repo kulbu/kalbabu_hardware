@@ -5,40 +5,52 @@
 #include <time.h>
 #include <kulbabu_hardware/kulbabu_hardware_interface.h>
 
-namespace kulbabu_hardware {
-
+namespace kulbabu_hardware
+{
 // Used to convert seconds elapsed to nanoseconds
 static const double BILLION = 1000000000.0;
 
 /**
- * \brief The control loop - repeatidly calls read() and write() to the hardware interface at a specified frequency
+ * \brief The control loop - repeatidly calls read() and write() to the hardware interface at a
+ * specified frequency
  *        We use MONOTONIC time to ensure robustness in the event of system time updates/change.
- *        See http://stackoverflow.com/questions/3523442/difference-between-clock-realtime-and-clock-monotonic
+ *        See
+ * http://stackoverflow.com/questions/3523442/difference-between-clock-realtime-and-clock-monotonic
  */
-class KulbabuHardwareControlLoop {
- public:
+class KulbabuHardwareControlLoop
+{
+public:
   /**
    * \brief Constructor
    * \param NodeHandle
    * \param hardware_interface - the robot-specific hardware interface to be use with your robot
    */
-  KulbabuHardwareControlLoop(ros::NodeHandle& nh,
-    boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> hardware_interface);
+  KulbabuHardwareControlLoop(
+      ros::NodeHandle& nh,
+      boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> hardware_interface);
 
   /** \brief Timer event
-   *         Note: we do not use the TimerEvent time difference because it does NOT guarantee that the time source is
+   *         Note: we do not use the TimerEvent time difference because it does NOT guarantee that
+   * the time source is
    *         strictly linearly increasing
    */
   void update(const ros::TimerEvent& e);
 
- protected:
+protected:
   // Startup and shutdown of the internal node inside a roscpp program
   ros::NodeHandle nh_;
 
+  // Name of this class
+  std::string name_ = "kulbabu_hardware_control_loop";
+
+  // Settings
+  ros::Duration desired_update_freq_;
+  double cycle_time_error_threshold_;
+
   // Timing
-  ros::Timer      non_realtime_loop_;
-  ros::Duration   elapsed_time_;
-  double          loop_hz_;
+  ros::Timer non_realtime_loop_;
+  ros::Duration elapsed_time_;
+  double loop_hz_;
   struct timespec last_time_;
   struct timespec current_time_;
 
@@ -52,6 +64,7 @@ class KulbabuHardwareControlLoop {
 
   /** \brief Abstract Hardware Interface for your robot */
   boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> hardware_interface_;
+
 };  // end class
 
-}  // namespace kulbabu_hardware
+}  // namespace

@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   spinner.start();
 
   // Create the hardware interface specific to your robot
-  int joint_mode = 1;  // position
+  int joint_mode = 1;  // velocity
   boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> hardware_interface;
   hardware_interface.reset(
     new kulbabu_hardware::KulbabuHardwareInterface(nh, joint_mode));
