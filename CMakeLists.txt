@@ -5,9 +5,14 @@ project(kulbabu_hardware)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-	roscpp
-        message_generation
-	sensor_msgs
+  hardware_interface
+  controller_manager
+  roscpp
+  message_generation
+  control_msgs
+  sensor_msgs
+  trajectory_msgs
+  actionlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -83,13 +88,19 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS
-		include
+    include
   LIBRARIES
+    kulbabu_hardware_control_loop
+    kulbabu_hardware_interface
   CATKIN_DEPENDS
-		roscpp
-                message_runtime
-                sensor_msgs
-#  DEPENDS system_lib
+    hardware_interface
+    controller_manager
+    roscpp
+    message_runtime
+    control_msgs
+    sensor_msgs
+    trajectory_msgs
+  DEPENDS system_lib
 )
 
 ###########
@@ -107,6 +118,27 @@ include_directories(
 # Ultrasonic Array
 add_executable(kulbabu_hardware_ultrasonic src/kulbabu_hardware_ultrasonic.cpp)
 target_link_libraries(kulbabu_hardware_ultrasonic
+  ${catkin_LIBRARIES}
+)
+
+# Control loop
+add_library(kulbabu_hardware_control_loop src/kulbabu_hardware_control_loop.cpp)
+target_link_libraries(kulbabu_hardware_control_loop
+  ${catkin_LIBRARIES}
+)
+
+# Hardware Interface
+add_library(kulbabu_hardware_interface src/kulbabu_hardware_interface.cpp)
+target_link_libraries(kulbabu_hardware_interface
+  ${catkin_LIBRARIES}
+  ${wiringPi_LIBRARY}
+)
+
+# Main control executable
+add_executable(kulbabu_hardware_main src/kulbabu_hardware_main.cpp)
+target_link_libraries(kulbabu_hardware_main
+  kulbabu_hardware_interface
+  kulbabu_hardware_control_loop
   ${catkin_LIBRARIES}
 )
 

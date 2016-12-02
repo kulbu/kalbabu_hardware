@@ -19,6 +19,12 @@
 
     </node>
 
+    <rosparam file="$(find kulbabu_hardware)/config/odroid_velocity.yaml" command="load" />
+
+    <!-- Load hardware interface -->
+    <node name="kulbabu_hardware_interface" pkg="kulbabu_hardware" type="kulbabu_hardware_main"
+          output="screen" />
+
   </group>
 
 </launch>
