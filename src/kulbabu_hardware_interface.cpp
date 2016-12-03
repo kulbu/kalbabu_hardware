@@ -24,6 +24,8 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
   // Load rosparams
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
   ros::NodeHandle ph("~");
+  // FIXME: Use `getParam`
+  // TODO: Add config file giving joint names to register.
   ph.param("joints", joint_names_);
   /*
   std::size_t error = 0;
