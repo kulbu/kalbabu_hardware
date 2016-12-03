@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   int joint_mode = 1;  // velocity
   boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> hardware_interface;
   hardware_interface.reset(
-    new kulbabu_hardware::KulbabuHardwareInterface(nh, joint_mode));
+    new kulbabu_hardware::KulbabuHardwareInterface(nh));
 
   // Start the control loop
   kulbabu_hardware::KulbabuHardwareControlLoop control_loop(nh, hardware_interface);

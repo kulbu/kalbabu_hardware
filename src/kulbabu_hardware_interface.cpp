@@ -301,7 +301,7 @@ void KulbabuHardwareInterface::loadURDF(ros::NodeHandle &nh, std::string param_n
     ROS_DEBUG_STREAM_NAMED(name_, "Received URDF from param server");
 }
 
-void KulbabuHardwareInterface::read(ros::Duration elapsed_time) {
+void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
   // TODO: Optical encoders.
 
   // Read the joint states from your hardware here
@@ -314,19 +314,22 @@ void KulbabuHardwareInterface::read(ros::Duration elapsed_time) {
   // }
 }
 
-void KulbabuHardwareInterface::write(ros::Duration elapsed_time) {
+void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
+
+  int joint_mode = 1;
 
   // Send commands in different modes
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
 
-    switch (joint_mode_) {
+    switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
       // TODO: Temporary simulation, will move to `read`.
       joint_velocity_[i] = joint_velocity_command_[i];
 
-      ROS_DEBUG_STREAM_NAMED(name_,
+//      ROS_DEBUG_STREAM_NAMED(name_,
+      ROS_INFO_STREAM_NAMED(name_,
         "\ni: "     << i <<
         "\ncmd: "   << joint_velocity_command_[i] <<
         "\njoint: " << joint_names_[i]);

@@ -43,10 +43,10 @@ public:
   virtual void init();
 
   /** \brief Read the state from the robot hardware. */
-  virtual void read(ros::Duration &elapsed_time) = 0;
+  virtual void read(ros::Duration &elapsed_time);
 
   /** \brief Write the command to the robot hardware. */
-  virtual void write(ros::Duration &elapsed_time) = 0;
+  virtual void write(ros::Duration &elapsed_time);
 
   /** \brief Set all members to default values */
   virtual void reset();
@@ -85,7 +85,7 @@ public:
                            std::size_t joint_id);
 
   /** \breif Enforce limits for all values before writing */
-  virtual void enforceLimits(ros::Duration &period) = 0;
+  //virtual void enforceLimits(ros::Duration &period) = 0;
 
   /** \brief Helper for debugging a joint's state */
   virtual void printState();
