@@ -4,7 +4,7 @@
   <group ns="$(arg ns)">
 
     <!-- Load Ultrasonic Array -->
-    <node name="kulbabu_hardware_ultrasonic" pkg="kulbabu_hardware" type="kulbabu_hardware_ultrasonic"
+    <!--node name="kulbabu_hardware_ultrasonic" pkg="kulbabu_hardware" type="kulbabu_hardware_ultrasonic"
           output="screen">
 
       <param name="topic_name" type="string" value="range"/>
@@ -17,16 +17,14 @@
       <param name="min_range" type="double" value="0.02"/>
       <param name="publish_frequency" type="double" value="10.0"/>
 
-    </node>
+    </node-->
+
+	<!-- Load controller settings -->
+    <rosparam file="$(find kulbabu_hardware)/config/odroid_velocity.yaml" command="load"/>
 
     <!-- Load hardware interface -->
     <node name="kulbabu_hardware_interface" pkg="kulbabu_hardware" type="kulbabu_hardware_main"
-          output="screen">
-
-      <param name="cycle_time_error_threshold" type="double" value="10.00"/>
-      <param name="loop_hz" type="double" value="10.0"/>
-
-    </node>
+          output="screen" />
 
   </group>
 

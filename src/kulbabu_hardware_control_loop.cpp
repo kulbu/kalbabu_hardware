@@ -16,10 +16,17 @@ KulbabuHardwareControlLoop::KulbabuHardwareControlLoop(
   controller_manager_.reset(new controller_manager::ControllerManager(hardware_interface_.get(), nh_));
 
   // Load rosparams
+
+  // Get period - default to 100 hz
+  nh_.param("hardware_control_loop/loop_hz", loop_hz_, 100.0);
+  ROS_DEBUG_STREAM_NAMED("constructor",
+    "Using loop freqency of " << loop_hz_ << " hz");
+
+  nh_.param("hardware_control_loop/cycle_time_error_threshold", cycle_time_error_threshold_, 10.0);
+  ROS_DEBUG_STREAM_NAMED("constructor",
+    "Using cycle time threshold of " << cycle_time_error_threshold_);
+
   //ros::NodeHandle rpsnh(nh, name_);
-  ros::NodeHandle ph("~");
-  ph.param<double>("loop_hz", loop_hz_, 10.0);
-  ph.param<double>("cycle_time_error_threshold", cycle_time_error_threshold_, 10.0);
   /*
   std::size_t error = 0;
   error += !rosparam_shortcuts::get(name_, rpsnh, "loop_hz", loop_hz_);

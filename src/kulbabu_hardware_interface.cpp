@@ -22,11 +22,15 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
     urdf_model_ = urdf_model;
 
   // Load rosparams
+    ROS_INFO_STREAM_NAMED(name_, "Loading joint names");
+  nh.getParam("hardware_interface/joints", joint_names_);
+  if (joint_names_.size() == 0) {
+    ROS_FATAL_STREAM_NAMED(name_,
+      "No joints found on parameter server"
+        << " Namespace: " << nh_.getNamespace());
+    exit(-1);
+  }
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
-  ros::NodeHandle ph("~");
-  // FIXME: Use `getParam`
-  // TODO: Add config file giving joint names to register.
-  ph.param("joints", joint_names_);
   /*
   std::size_t error = 0;
   error += !rosparam_shortcuts::get(name_, rpnh, "joints", joint_names_);
@@ -57,9 +61,7 @@ void KulbabuHardwareInterface::init()
   // Initialize interfaces for each joint
   for (std::size_t joint_id = 0; joint_id < num_joints_; ++joint_id)
   {
-    ROS_DEBUG_STREAM_NAMED(name_, "Loading joint name: " << joint_names_[joint_id]);
-
-    // Create joint state interface
+     // Create joint state interface
     joint_state_interface_.registerHandle(hardware_interface::JointStateHandle(
        joint_names_[joint_id], &joint_position_[joint_id], &joint_velocity_[joint_id], &joint_effort_[joint_id]));
 
