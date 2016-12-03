@@ -18,8 +18,8 @@ KulbabuHardwareControlLoop::KulbabuHardwareControlLoop(
   // Load rosparams
   //ros::NodeHandle rpsnh(nh, name_);
   ros::NodeHandle ph("~");
-  ph.param<int>("loop_hz", loop_hz_, 10);
-  ph.param<int>("cycle_time_error_threshold", cycle_time_error_threshold_, 10);
+  ph.param<double>("loop_hz", loop_hz_, 10.0);
+  ph.param<double>("cycle_time_error_threshold", cycle_time_error_threshold_, 10.0);
   /*
   std::size_t error = 0;
   error += !rosparam_shortcuts::get(name_, rpsnh, "loop_hz", loop_hz_);

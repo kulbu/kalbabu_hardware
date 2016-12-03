@@ -24,7 +24,7 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
   // Load rosparams
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
   ros::NodeHandle ph("~");
-  ph.param<int>("joints", joint_names_, []);
+  ph.param("joints", joint_names_);
   /*
   std::size_t error = 0;
   error += !rosparam_shortcuts::get(name_, rpnh, "joints", joint_names_);
@@ -326,14 +326,14 @@ void KulbabuHardwareInterface::write(ros::Duration elapsed_time) {
       // TODO: Temporary simulation, will move to `read`.
       joint_velocity_[i] = joint_velocity_command_[i];
 
-      ROS_DEBUG_STREAM_NAMED("kulbabu_hardware_interface",
+      ROS_DEBUG_STREAM_NAMED(name_,
         "\ni: "     << i <<
         "\ncmd: "   << joint_velocity_command_[i] <<
         "\njoint: " << joint_names_[i]);
         break;
 
       default:
-        ROS_ERROR_STREAM_NAMED("kulbabu_hardware_interface",
+        ROS_ERROR_STREAM_NAMED(name_,
         "Joint mode not implemented");
         break;
     }
