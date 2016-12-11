@@ -306,6 +306,9 @@ void KulbabuHardwareInterface::loadURDF(ros::NodeHandle &nh, std::string param_n
 }
 
 void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
+
+  int joint_mode = 1;
+
   // TODO: Optical encoders.
 
   // Read the joint states from your hardware here
@@ -316,6 +319,31 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
   //   joint_velocity_[i] = robot_api_.getJointVelocity(i);
   //   joint_effort_[i] = robot_api_.getJointEffort(i);
   // }
+
+  for (std::size_t i = 0; i < num_joints_; ++i)
+  {
+    switch (joint_mode) {
+      case 1:  // hardware_interface::MODE_VELOCITY:
+        // TODO: Get encoder percentage of max velocity.
+        // TODO: Variable for max velocity encoder time.
+        uint8_t encoder_perc = 0.5;
+        uint8_t cmd_mps = encoder_perc * joint_velocity_limits_[i];
+        joint_velocity_[i] = cmd_mps;
+
+        ROS_INFO_STREAM_NAMED(name_,
+          "\nread: " <<
+          "\ni: "     << i <<
+          "\nperc: "  << encoder_perc <<
+          "\nmps: "   << cmd_mps <<
+          "\njoint: " << joint_names_[i]);
+        break;
+
+      default:
+        ROS_ERROR_STREAM_NAMED(name_,
+        "Joint mode not implemented");
+        break;
+    }
+  }
 }
 
 void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
@@ -329,14 +357,21 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
-      // TODO: Temporary simulation, will move to `read`.
-      joint_velocity_[i] = joint_velocity_command_[i];
+        // Convert to 8-bit percentage [0-255] of max_velocity.
+        uint8_t cmd_perc = joint_velocity_command_[i] / joint_velocity_limits_[i];
 
-//      ROS_DEBUG_STREAM_NAMED(name_,
-      ROS_INFO_STREAM_NAMED(name_,
-        "\ni: "     << i <<
-        "\ncmd: "   << joint_velocity_command_[i] <<
-        "\njoint: " << joint_names_[i]);
+        // TODO: Send `cmd_perc * 255` and direction to motor driver.
+
+        // TODO: Temporary simulation, will move to `read`.
+        joint_velocity_[i] = joint_velocity_command_[i];
+
+  //      ROS_DEBUG_STREAM_NAMED(name_,
+        ROS_INFO_STREAM_NAMED(name_,
+          "\nwrite: " <<
+          "\ni: "     << i <<
+          "\ncmd: "   << joint_velocity_command_[i] <<
+          "\nperc: "  << cmd_perc <<
+          "\njoint: " << joint_names_[i]);
         break;
 
       default:
