@@ -107,6 +107,9 @@ protected:
   // Startup and shutdown of the internal node inside a roscpp program
   ros::NodeHandle nh_;
 
+  // Robot API
+  kulbabu_hardware::KulbabuHardwareMotors kulbabu_motors_;
+
   // Hardware interfaces
   hardware_interface::JointStateInterface joint_state_interface_;
   hardware_interface::PositionJointInterface position_joint_interface_;

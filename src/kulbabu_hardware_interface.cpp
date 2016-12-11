@@ -30,6 +30,9 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
         << " Namespace: " << nh_.getNamespace());
     exit(-1);
   }
+
+  kulbabu_motors_ = KulbabuHardwareMotors(&nh);
+
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
   /*
   std::size_t error = 0;
@@ -322,21 +325,21 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
+    double encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
+
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
         // TODO: Get encoder percentage of max velocity.
         //uint8_t encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
-        uint8_t encoder_perc = 0.5;
         // Convert to metres per second.
-        uint8_t cmd_mps = encoder_perc * joint_velocity_limits_[i];
-        joint_velocity_[i] = cmd_mps;
+        joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
 
         ROS_INFO_STREAM_NAMED(name_,
           "\nread: " <<
           "\ni: "     << i <<
           "\nperc: "  << encoder_perc <<
-          "\nmps: "   << cmd_mps <<
+          "\nmps: "   << joint_velocity_[i] <<
           "\njoint: " << joint_names_[i]);
         break;
 
@@ -355,13 +358,12 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
   // Send commands in different modes
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
+    // Convert velocity to percentage of max.
+    double cmd_perc = joint_velocity_command_[i] / joint_velocity_limits_[i];
 
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
-
-        // Convert velocity to percentage of max.
-        uint8_t cmd_perc = joint_velocity_command_[i] / joint_velocity_limits_[i];
-
+        // Set command buffer for sending.
         kulbabu_motors_.setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
@@ -383,6 +385,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     }
   }
 
+  // Send the command buffer.
   kulbabu_motors_.doCommand();
 }
 
