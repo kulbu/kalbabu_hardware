@@ -28,10 +28,8 @@ void KulbabuHardwareMotors::setCommand(uint8_t index, double cmd_perc)
   }
   */
 
-  //buf[(index*4)] = cmd_dir; // Direction
-  //buf[(index*4)+1] = abs(cmd_perc) * 255; // Velocity
-  //buf[(index*4)+2] N/A
-  //buf[(index*4)+3] N/A
+  //buf[(index*2)] = cmd_dir; // Direction
+  //buf[(index*2)+1] = abs(cmd_perc) * 255; // Velocity
 }
 
 void KulbabuHardwareMotors::doCommand()
