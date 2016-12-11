@@ -22,6 +22,8 @@
 #include <joint_limits_interface/joint_limits_rosparam.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
 
+#include <kulbabu_hardware/kulbabu_hardware_motors.h>
+
 namespace kulbabu_hardware
 {
 

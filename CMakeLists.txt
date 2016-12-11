@@ -98,6 +98,7 @@ catkin_package(
   LIBRARIES
     kulbabu_hardware_control_loop
     kulbabu_hardware_interface
+    kulbabu_hardware_motors
   CATKIN_DEPENDS
     hardware_interface
     controller_manager
@@ -130,6 +131,12 @@ target_link_libraries(kulbabu_hardware_ultrasonic
   ${catkin_LIBRARIES}
 )
 
+# Robot API
+add_library(kulbabu_hardware_motors src/kulbabu_hardware_motors.cpp)
+target_link_libraries(kulbabu_hardware_motors
+  ${catkin_LIBRARIES}
+)
+
 # Control loop
 add_library(kulbabu_hardware_control_loop src/kulbabu_hardware_control_loop.cpp)
 target_link_libraries(kulbabu_hardware_control_loop
@@ -139,6 +146,7 @@ target_link_libraries(kulbabu_hardware_control_loop
 # Hardware Interface
 add_library(kulbabu_hardware_interface src/kulbabu_hardware_interface.cpp)
 target_link_libraries(kulbabu_hardware_interface
+  kulbabu_hardware_motors
   ${catkin_LIBRARIES}
   ${wiringPi_LIBRARY}
 )

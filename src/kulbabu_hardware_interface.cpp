@@ -324,9 +324,11 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
   {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
+
         // TODO: Get encoder percentage of max velocity.
-        // TODO: Variable for max velocity encoder time.
+        //uint8_t encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
         uint8_t encoder_perc = 0.5;
+        // Convert to metres per second.
         uint8_t cmd_mps = encoder_perc * joint_velocity_limits_[i];
         joint_velocity_[i] = cmd_mps;
 
@@ -357,13 +359,13 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
-        // Convert to 8-bit percentage [0-255] of max_velocity.
+        // Convert velocity to percentage of max.
         uint8_t cmd_perc = joint_velocity_command_[i] / joint_velocity_limits_[i];
 
-        // TODO: Send `cmd_perc * 255` and direction to motor driver.
+        kulbabu_motors_.setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
-        joint_velocity_[i] = joint_velocity_command_[i];
+        //joint_velocity_[i] = joint_velocity_command_[i];
 
   //      ROS_DEBUG_STREAM_NAMED(name_,
         ROS_INFO_STREAM_NAMED(name_,
@@ -380,6 +382,8 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
         break;
     }
   }
+
+  kulbabu_motors_.doCommand();
 }
 
 }  // namespace
