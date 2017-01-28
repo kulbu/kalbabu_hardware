@@ -34,8 +34,6 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh,
     exit(-1);
   }
 
-  //kulbabu_motors_ = new KulbabuHardwareMotors(nh_);
-
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
   /*
   std::size_t error = 0;
@@ -328,14 +326,13 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    //double encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
-    double encoder_perc = 126/255;
+    //double encoder_perc = 126/255;
 
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
         // TODO: Get encoder percentage of max velocity.
-        //uint8_t encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
+        double encoder_perc = hardware_motors_.getEncoderVelocity(i);
         // Convert to metres per second.
         joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
 
@@ -368,7 +365,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
         // Set command buffer for sending.
-        //kulbabu_motors_.setCommand(i, cmd_perc);
+        hardware_motors_.setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
         //joint_velocity_[i] = joint_velocity_command_[i];
@@ -390,7 +387,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
   }
 
   // Send the command buffer.
-  //kulbabu_motors_.doCommand();
+  hardware_motors_.doCommand();
 }
 
 }  // namespace

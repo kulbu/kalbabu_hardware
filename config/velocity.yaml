@@ -1,0 +1,11 @@
+# Settings for oDroid C1 2x on-board PWM.
+hardware_interface:
+  # Encoder value at max velocity.
+  encoder_max: 100
+  joints:
+    - mid_left_wheel_joint
+    - mid_right_wheel_joint
+    - front_left_wheel_joint # Only 2x PWM available so these are skipped.
+    - front_right_wheel_joint
+    - back_left_wheel_joint
+    - back_right_wheel_joint
