@@ -35,7 +35,7 @@ public:
 protected:
 
   // Short name of this class
-  std::string name_;
+  std::string name_ = "kulbabu_hardware_motors";
 
   // Startup and shutdown of the internal node inside a roscpp program
   ros::NodeHandle nh_;

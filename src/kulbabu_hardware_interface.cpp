@@ -9,11 +9,14 @@
 
 namespace kulbabu_hardware
 {
-KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Model *urdf_model)
+KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh,
+  boost::shared_ptr<kulbabu_hardware::KulbabuHardwareMotors> hardware_motors,
+  urdf::Model *urdf_model)
   : name_("kulbabu_hardware_interface")
   , nh_(nh)
   , use_rosparam_joint_limits_(false)
   , use_soft_limits_if_available_(false)
+  , hardware_motors_(hardware_motors)
 {
   // Check if the URDF model needs to be loaded
   if (urdf_model == NULL)
@@ -22,7 +25,7 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
     urdf_model_ = urdf_model;
 
   // Load rosparams
-    ROS_INFO_STREAM_NAMED(name_, "Loading joint names");
+  ROS_INFO_STREAM_NAMED(name_, "Loading joint names");
   nh.getParam("hardware_interface/joints", joint_names_);
   if (joint_names_.size() == 0) {
     ROS_FATAL_STREAM_NAMED(name_,
@@ -31,7 +34,7 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Mo
     exit(-1);
   }
 
-  kulbabu_motors_ = KulbabuHardwareMotors(&nh);
+  //kulbabu_motors_ = new KulbabuHardwareMotors(nh_);
 
   //ros::NodeHandle rpnh(nh_, "kulbabu_hardware_interface");
   /*
@@ -325,7 +328,8 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    double encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
+    //double encoder_perc = kulbabu_motors_.getEncoderVelocity(i);
+    double encoder_perc = 126/255;
 
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
@@ -364,7 +368,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
         // Set command buffer for sending.
-        kulbabu_motors_.setCommand(i, cmd_perc);
+        //kulbabu_motors_.setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
         //joint_velocity_[i] = joint_velocity_command_[i];
@@ -386,7 +390,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
   }
 
   // Send the command buffer.
-  kulbabu_motors_.doCommand();
+  //kulbabu_motors_.doCommand();
 }
 
 }  // namespace

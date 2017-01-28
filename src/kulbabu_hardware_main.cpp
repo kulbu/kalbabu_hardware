@@ -3,6 +3,7 @@
  */
 #include <kulbabu_hardware/kulbabu_hardware_control_loop.h>
 #include <kulbabu_hardware/kulbabu_hardware_interface.h>
+#include <kulbabu_hardware/kulbabu_hardware_motors.h>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "kulbabu_hardware_interface");
@@ -14,8 +15,10 @@ int main(int argc, char** argv) {
   spinner.start();
 
   // Create the hardware interface specific to your robot
+  boost::shared_ptr<kulbabu_hardware::KulbabuHardwareMotors> kulbabu_hardware_motors
+    (new kulbabu_hardware::KulbabuHardwareMotors(nh));
   boost::shared_ptr<kulbabu_hardware::KulbabuHardwareInterface> kulbabu_hardware_interface
-    (new kulbabu_hardware::KulbabuHardwareInterface(nh));
+    (new kulbabu_hardware::KulbabuHardwareInterface(nh, kulbabu_hardware_motors));
   kulbabu_hardware_interface->init();
 
   // Start the control loop

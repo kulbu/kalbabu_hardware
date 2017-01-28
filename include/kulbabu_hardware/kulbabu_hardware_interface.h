@@ -36,7 +36,9 @@ public:
    * \param nh - Node handle for topics.
    * \param urdf - optional pointer to a parsed robot model
    */
-  KulbabuHardwareInterface(ros::NodeHandle &nh, urdf::Model *urdf_model = NULL);
+  KulbabuHardwareInterface(ros::NodeHandle &nh,
+      boost::shared_ptr<kulbabu_hardware::KulbabuHardwareMotors> hardware_motors,
+      urdf::Model *urdf_model = NULL);
 
   /** \brief Destructor */
   virtual ~KulbabuHardwareInterface() {}
@@ -107,8 +109,8 @@ protected:
   // Startup and shutdown of the internal node inside a roscpp program
   ros::NodeHandle nh_;
 
-  // Robot API
-  kulbabu_hardware::KulbabuHardwareMotors kulbabu_motors_;
+  /** \brief Abstract Hardware Motors for your robot */
+  boost::shared_ptr<kulbabu_hardware::KulbabuHardwareMotors> hardware_motors_;
 
   // Hardware interfaces
   hardware_interface::JointStateInterface joint_state_interface_;
