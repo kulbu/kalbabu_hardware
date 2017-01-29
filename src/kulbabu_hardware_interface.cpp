@@ -338,7 +338,7 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
         // Convert to metres per second.
         joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
 
-        printStateHelper();
+        ROS_INFO_STREAM_NAMED(name_, printStateHelper());
 
         ROS_INFO_STREAM_NAMED(name_,
           "\nread: " <<
@@ -374,7 +374,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
         // TODO: Temporary simulation, will move to `read`.
         //joint_velocity_[i] = joint_velocity_command_[i];
 
-        printCommandHelper();
+        ROS_INFO_STREAM_NAMED(name_, printCommandHelper());
 
   //      ROS_DEBUG_STREAM_NAMED(name_,
         ROS_INFO_STREAM_NAMED(name_,
