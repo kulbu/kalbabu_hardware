@@ -14,9 +14,9 @@ KulbabuHardwareInterface::KulbabuHardwareInterface(ros::NodeHandle &nh,
   urdf::Model *urdf_model)
   : name_("kulbabu_hardware_interface")
   , nh_(nh)
+  , hardware_motors_(hardware_motors)
   , use_rosparam_joint_limits_(false)
   , use_soft_limits_if_available_(false)
-  , hardware_motors_(hardware_motors)
 {
   // Check if the URDF model needs to be loaded
   if (urdf_model == NULL)
@@ -326,15 +326,19 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    //double encoder_perc = 126/255;
+    double encoder_perc;
 
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
-        // TODO: Get encoder percentage of max velocity.
-        double encoder_perc = hardware_motors_.getEncoderVelocity(i);
+        // Get encoder percentage of max velocity.
+        //encoder_perc = hardware_motors_.getEncoderVelocity(i);
+        encoder_perc = 0.5;
+
         // Convert to metres per second.
         joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
+
+        printStateHelper();
 
         ROS_INFO_STREAM_NAMED(name_,
           "\nread: " <<
@@ -365,10 +369,12 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
         // Set command buffer for sending.
-        hardware_motors_.setCommand(i, cmd_perc);
+        //hardware_motors_.setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
         //joint_velocity_[i] = joint_velocity_command_[i];
+
+        printCommandHelper();
 
   //      ROS_DEBUG_STREAM_NAMED(name_,
         ROS_INFO_STREAM_NAMED(name_,
@@ -387,7 +393,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
   }
 
   // Send the command buffer.
-  hardware_motors_.doCommand();
+  //hardware_motors_.doCommand();
 }
 
 }  // namespace

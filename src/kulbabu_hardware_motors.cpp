@@ -19,6 +19,7 @@ KulbabuHardwareMotors::KulbabuHardwareMotors(ros::NodeHandle &nh)
 
 void KulbabuHardwareMotors::setCommand(uint8_t index, double cmd_perc)
 {
+  ROS_INFO_STREAM_NAMED(name_, "setCommand");
   /*
   uint8_t cmd_dir  = 0;
   if (cmd_perc > 0) {
@@ -34,13 +35,14 @@ void KulbabuHardwareMotors::setCommand(uint8_t index, double cmd_perc)
 
 void KulbabuHardwareMotors::doCommand()
 {
+  ROS_INFO_STREAM_NAMED(name_, "doCommand");
   // TODO: Write then read to/from I2C.
 }
 
 double KulbabuHardwareMotors::getEncoderVelocity(uint8_t index)
 {
-
-  return 126/255;
+  ROS_INFO_STREAM_NAMED(name_, "getEncoderVelocity");
+  return 0.5;
 }
 
 }  // namespace
