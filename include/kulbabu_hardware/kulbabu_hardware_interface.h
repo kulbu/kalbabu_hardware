@@ -83,9 +83,10 @@ public:
    *
    * \return the joint's type, lower position limit, upper position limit, and effort limit.
    */
-  virtual void registerJointLimits(const hardware_interface::JointHandle &joint_handle_position,
+  virtual void registerJointLimits(
+                           //const hardware_interface::JointHandle &joint_handle_position,
                            const hardware_interface::JointHandle &joint_handle_velocity,
-                           const hardware_interface::JointHandle &joint_handle_effort,
+                           //const hardware_interface::JointHandle &joint_handle_effort,
                            std::size_t joint_id);
 
   /** \breif Enforce limits for all values before writing */
@@ -114,19 +115,19 @@ protected:
 
   // Hardware interfaces
   hardware_interface::JointStateInterface joint_state_interface_;
-  hardware_interface::PositionJointInterface position_joint_interface_;
+  //hardware_interface::PositionJointInterface position_joint_interface_;
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
-  hardware_interface::EffortJointInterface effort_joint_interface_;
+  //hardware_interface::EffortJointInterface effort_joint_interface_;
 
   // Joint limits interfaces - Saturation
-  joint_limits_interface::PositionJointSaturationInterface pos_jnt_sat_interface_;
+  //joint_limits_interface::PositionJointSaturationInterface pos_jnt_sat_interface_;
   joint_limits_interface::VelocityJointSaturationInterface vel_jnt_sat_interface_;
-  joint_limits_interface::EffortJointSaturationInterface eff_jnt_sat_interface_;
+  //joint_limits_interface::EffortJointSaturationInterface eff_jnt_sat_interface_;
 
   // Joint limits interfaces - Soft limits
-  joint_limits_interface::PositionJointSoftLimitsInterface pos_jnt_soft_limits_;
+  //joint_limits_interface::PositionJointSoftLimitsInterface pos_jnt_soft_limits_;
   joint_limits_interface::VelocityJointSoftLimitsInterface vel_jnt_soft_limits_;
-  joint_limits_interface::EffortJointSoftLimitsInterface eff_jnt_soft_limits_;
+  //joint_limits_interface::EffortJointSoftLimitsInterface eff_jnt_soft_limits_;
 
   // Configuration
   std::vector<std::string> joint_names_;
@@ -143,15 +144,15 @@ protected:
   std::vector<double> joint_effort_;
 
   // Commands
-  std::vector<double> joint_position_command_;
+  //std::vector<double> joint_position_command_;
   std::vector<double> joint_velocity_command_;
-  std::vector<double> joint_effort_command_;
+  //std::vector<double> joint_effort_command_;
 
   // Copy of limits, in case we need them later in our control stack
-  std::vector<double> joint_position_lower_limits_;
-  std::vector<double> joint_position_upper_limits_;
+  //std::vector<double> joint_position_lower_limits_;
+  //std::vector<double> joint_position_upper_limits_;
   std::vector<double> joint_velocity_limits_;
-  std::vector<double> joint_effort_limits_;
+  //std::vector<double> joint_effort_limits_;
 
 };  // class
 

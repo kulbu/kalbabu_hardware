@@ -52,15 +52,15 @@ void KulbabuHardwareInterface::init()
   joint_effort_.resize(num_joints_, 0.0);
 
   // Command
-  joint_position_command_.resize(num_joints_, 0.0);
+  //joint_position_command_.resize(num_joints_, 0.0);
   joint_velocity_command_.resize(num_joints_, 0.0);
-  joint_effort_command_.resize(num_joints_, 0.0);
+  //joint_effort_command_.resize(num_joints_, 0.0);
 
   // Limits
-  joint_position_lower_limits_.resize(num_joints_, 0.0);
-  joint_position_upper_limits_.resize(num_joints_, 0.0);
+  //joint_position_lower_limits_.resize(num_joints_, 0.0);
+  //joint_position_upper_limits_.resize(num_joints_, 0.0);
   joint_velocity_limits_.resize(num_joints_, 0.0);
-  joint_effort_limits_.resize(num_joints_, 0.0);
+  //joint_effort_limits_.resize(num_joints_, 0.0);
 
   // Initialize interfaces for each joint
   for (std::size_t joint_id = 0; joint_id < num_joints_; ++joint_id)
@@ -71,40 +71,46 @@ void KulbabuHardwareInterface::init()
 
     // Add command interfaces to joints
     // TODO: decide based on transmissions?
+    /*
     hardware_interface::JointHandle joint_handle_position = hardware_interface::JointHandle(
        joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_position_command_[joint_id]);
     position_joint_interface_.registerHandle(joint_handle_position);
+    */
 
     hardware_interface::JointHandle joint_handle_velocity = hardware_interface::JointHandle(
        joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_velocity_command_[joint_id]);
     velocity_joint_interface_.registerHandle(joint_handle_velocity);
 
+    /*
     hardware_interface::JointHandle joint_handle_effort = hardware_interface::JointHandle(
        joint_state_interface_.getHandle(joint_names_[joint_id]), &joint_effort_command_[joint_id]);
     effort_joint_interface_.registerHandle(joint_handle_effort);
+    */
 
     // Load the joint limits
-    registerJointLimits(joint_handle_position, joint_handle_velocity, joint_handle_effort, joint_id);
+    //registerJointLimits(joint_handle_position, joint_handle_velocity, joint_handle_effort, joint_id);
+    registerJointLimits(joint_handle_velocity, joint_id);
   }  // end for each joint
 
  registerInterface(&joint_state_interface_);     // From RobotHW base class.
- registerInterface(&position_joint_interface_);  // From RobotHW base class.
+ //registerInterface(&position_joint_interface_);  // From RobotHW base class.
  registerInterface(&velocity_joint_interface_);  // From RobotHW base class.
- registerInterface(&effort_joint_interface_);    // From RobotHW base class.
+ //registerInterface(&effort_joint_interface_);    // From RobotHW base class.
 
  ROS_INFO_STREAM_NAMED(name_, "KulbabuHardwareInterface Ready.");
 }
 
-void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::JointHandle &joint_handle_position,
+void KulbabuHardwareInterface::registerJointLimits(
+                                            //const hardware_interface::JointHandle &joint_handle_position,
                                             const hardware_interface::JointHandle &joint_handle_velocity,
-                                            const hardware_interface::JointHandle &joint_handle_effort,
+                                            //const hardware_interface::JointHandle &joint_handle_effort,
                                             std::size_t joint_id)
 {
   // Default values
-  joint_position_lower_limits_[joint_id] = -std::numeric_limits<double>::max();
-  joint_position_upper_limits_[joint_id] = std::numeric_limits<double>::max();
+  //joint_position_lower_limits_[joint_id] = -std::numeric_limits<double>::max();
+  //joint_position_upper_limits_[joint_id] = std::numeric_limits<double>::max();
   joint_velocity_limits_[joint_id] = std::numeric_limits<double>::max();
-  joint_effort_limits_[joint_id] = std::numeric_limits<double>::max();
+  //joint_effort_limits_[joint_id] = std::numeric_limits<double>::max();
 
   // Limits datastructures
   joint_limits_interface::JointLimits joint_limits;     // Position
@@ -133,17 +139,18 @@ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::Joi
   if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits))
   {
     has_joint_limits = true;
-    ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF position limits ["
+    if (joint_limits.max_position)
+      ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF position limits ["
                                                          << joint_limits.min_position << ", "
                                                          << joint_limits.max_position << "]");
     if (joint_limits.has_velocity_limits)
-    ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF velocity limit ["
+      ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " has URDF velocity limit ["
                                                            << joint_limits.max_velocity << "]");
   }
   else
   {
     if (urdf_joint->type != urdf::Joint::CONTINUOUS)
-    ROS_WARN_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " does not have a URDF "
+      ROS_WARN_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id] << " does not have a URDF "
                          "position limit");
   }
 
@@ -153,11 +160,13 @@ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::Joi
     if (joint_limits_interface::getJointLimits(joint_names_[joint_id], nh_, joint_limits))
     {
       has_joint_limits = true;
-      ROS_DEBUG_STREAM_NAMED(name_,
+      if (joint_limits.max_position)
+        ROS_DEBUG_STREAM_NAMED(name_,
                             "Joint " << joint_names_[joint_id] << " has rosparam position limits ["
                                      << joint_limits.min_position << ", " << joint_limits.max_position << "]");
+
       if (joint_limits.has_velocity_limits)
-       ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
+        ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
                                                                << " has rosparam velocity limit ["
                                                                << joint_limits.max_velocity << "]");
     }  // the else debug message provided internally by joint_limits_interface
@@ -185,6 +194,7 @@ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::Joi
   }
 
   // Copy position limits if available
+  /*
   if (joint_limits.has_position_limits)
   {
     // Slighly reduce the joint limits to prevent floating point errors
@@ -194,6 +204,7 @@ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::Joi
     joint_position_lower_limits_[joint_id] = joint_limits.min_position;
     joint_position_upper_limits_[joint_id] = joint_limits.max_position;
   }
+  */
 
   // Copy velocity limits if available
   if (joint_limits.has_velocity_limits)
@@ -202,44 +213,54 @@ void KulbabuHardwareInterface::registerJointLimits(const hardware_interface::Joi
   }
 
   // Copy effort limits if available
+  /*
   if (joint_limits.has_effort_limits)
   {
     joint_effort_limits_[joint_id] = joint_limits.max_effort;
   }
+  */
 
   if (has_soft_limits)  // Use soft limits
   {
-    ROS_DEBUG_STREAM_NAMED(name_, "Using soft saturation limits");
+    ROS_INFO_STREAM_NAMED(name_, "Using soft saturation limits");
+    /*
     const joint_limits_interface::PositionJointSoftLimitsHandle soft_handle_position(joint_handle_position,
                                                                                     joint_limits, soft_limits);
     pos_jnt_soft_limits_.registerHandle(soft_handle_position);
+    */
     const joint_limits_interface::VelocityJointSoftLimitsHandle soft_handle_velocity(joint_handle_velocity,
                                                                                     joint_limits, soft_limits);
     vel_jnt_soft_limits_.registerHandle(soft_handle_velocity);
+    /*
     const joint_limits_interface::EffortJointSoftLimitsHandle soft_handle_effort(joint_handle_effort, joint_limits,
                                                                                 soft_limits);
     eff_jnt_soft_limits_.registerHandle(soft_handle_effort);
+    */
   }
   else  // Use saturation limits
   {
-    ROS_DEBUG_STREAM_NAMED(name_, "Using saturation limits (not soft limits)");
+    ROS_INFO_STREAM_NAMED(name_, "Using saturation limits (not soft limits)");
 
+    /*
     const joint_limits_interface::PositionJointSaturationHandle sat_handle_position(joint_handle_position, joint_limits);
     pos_jnt_sat_interface_.registerHandle(sat_handle_position);
+    */
 
     const joint_limits_interface::VelocityJointSaturationHandle sat_handle_velocity(joint_handle_velocity, joint_limits);
     vel_jnt_sat_interface_.registerHandle(sat_handle_velocity);
 
+    /*
     const joint_limits_interface::EffortJointSaturationHandle sat_handle_effort(joint_handle_effort, joint_limits);
     eff_jnt_sat_interface_.registerHandle(sat_handle_effort);
+    */
   }
 }
 
 void KulbabuHardwareInterface::reset()
 {
   // Reset joint limits state, in case of mode switch or e-stop
-  pos_jnt_sat_interface_.reset();
-  pos_jnt_soft_limits_.reset();
+  //pos_jnt_sat_interface_.reset();
+  //pos_jnt_soft_limits_.reset();
 }
 
 void KulbabuHardwareInterface::printState()
@@ -257,9 +278,11 @@ std::string KulbabuHardwareInterface::printStateHelper()
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    ss << "j" << i << ": " << std::fixed << joint_position_[i] << "\t ";
+    ss << "j" << i << ": ";
+    //ss << std::fixed << joint_position_[i] << "\t ";
     ss << std::fixed << joint_velocity_[i] << "\t ";
-    ss << std::fixed << joint_effort_[i] << std::endl;
+    //ss << std::fixed << joint_effort_[i];
+    ss << std::endl;
   }
   return ss.str();
 }
@@ -271,9 +294,11 @@ std::string KulbabuHardwareInterface::printCommandHelper()
   ss << "    position     velocity         effort  \n";
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
-    ss << "j" << i << ": " << std::fixed << joint_position_command_[i] << "\t ";
+    ss << "j" << i << ": ";
+    //ss << std::fixed << joint_position_command_[i] << "\t ";
     ss << std::fixed << joint_velocity_command_[i] << "\t ";
-    ss << std::fixed << joint_effort_command_[i] << std::endl;
+    //ss << std::fixed << joint_effort_command_[i];
+    ss << std::endl;
   }
   return ss.str();
 }
@@ -313,17 +338,6 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
   int joint_mode = 1;
 
-  // TODO: Optical encoders.
-
-  // Read the joint states from your hardware here
-  // e.g.
-  // for (std::size_t i = 0; i < num_joints_; ++i)
-  // {
-  //   joint_position_[i] = robot_api_.getJointPosition(i);
-  //   joint_velocity_[i] = robot_api_.getJointVelocity(i);
-  //   joint_effort_[i] = robot_api_.getJointEffort(i);
-  // }
-
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
     double encoder_perc;
@@ -332,20 +346,22 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
       case 1:  // hardware_interface::MODE_VELOCITY:
 
         // Get encoder percentage of max velocity.
-        //encoder_perc = hardware_motors_.getEncoderVelocity(i);
-        encoder_perc = 0.5;
+        encoder_perc = hardware_motors_->getEncoderVelocity(i);
 
         // Convert to metres per second.
-        joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
+        // TODO: Temporary simulation, remove from `write`.
+        //joint_velocity_[i] = encoder_perc * joint_velocity_limits_[i];
 
-        ROS_INFO_STREAM_NAMED(name_, printStateHelper());
+        //ROS_DEBUG_STREAM_NAMED(name_, printStateHelper());
 
+        /*
         ROS_INFO_STREAM_NAMED(name_,
           "\nread: " <<
           "\ni: "     << i <<
           "\nperc: "  << encoder_perc <<
           "\nmps: "   << joint_velocity_[i] <<
           "\njoint: " << joint_names_[i]);
+          */
         break;
 
       default:
@@ -358,6 +374,7 @@ void KulbabuHardwareInterface::read(ros::Duration &elapsed_time) {
 
 void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
 
+  // TODO: Read from URDF
   int joint_mode = 1;
 
   // Send commands in different modes
@@ -369,20 +386,24 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
     switch (joint_mode) {
       case 1:  // hardware_interface::MODE_VELOCITY:
         // Set command buffer for sending.
-        //hardware_motors_.setCommand(i, cmd_perc);
+        hardware_motors_->setCommand(i, cmd_perc);
 
         // TODO: Temporary simulation, will move to `read`.
-        //joint_velocity_[i] = joint_velocity_command_[i];
+        joint_velocity_[i] = joint_velocity_command_[i];
 
-        ROS_INFO_STREAM_NAMED(name_, printCommandHelper());
+        //ROS_DEBUG_STREAM_NAMED(name_, printCommandHelper());
 
   //      ROS_DEBUG_STREAM_NAMED(name_,
-        ROS_INFO_STREAM_NAMED(name_,
-          "\nwrite: " <<
-          "\ni: "     << i <<
-          "\ncmd: "   << joint_velocity_command_[i] <<
-          "\nperc: "  << cmd_perc <<
-          "\njoint: " << joint_names_[i]);
+        if (cmd_perc > 0) {
+          ROS_INFO_STREAM_NAMED(name_,
+            "\nwrite: " <<
+            "\ni: "     << i <<
+            "\ncmd: "   << joint_velocity_command_[i] <<
+            "\nlmt: "   << joint_velocity_limits_[i] <<
+            "\nperc: "  << cmd_perc <<
+            "\njoint: " << joint_names_[i]);
+        }
+
         break;
 
       default:
@@ -393,7 +414,7 @@ void KulbabuHardwareInterface::write(ros::Duration &elapsed_time) {
   }
 
   // Send the command buffer.
-  //hardware_motors_.doCommand();
+  hardware_motors_->doCommand();
 }
 
 }  // namespace

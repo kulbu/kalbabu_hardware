@@ -154,6 +154,7 @@ target_link_libraries(kulbabu_hardware_interface
 # Main control executable
 add_executable(kulbabu_hardware_main src/kulbabu_hardware_main.cpp)
 target_link_libraries(kulbabu_hardware_main
+  kulbabu_hardware_motors
   kulbabu_hardware_interface
   kulbabu_hardware_control_loop
   ${catkin_LIBRARIES}
