@@ -2,7 +2,7 @@
  * Based on: https://github.com/davetcoleman/ros_control_boilerplate
  */
 #include <kulbabu_hardware/kulbabu_hardware_interface.h>
-#include <limits>
+//#include <limits>
 
 // ROS parameter loading
 //#include <rosparam_shortcuts/rosparam_shortcuts.h>
@@ -222,7 +222,7 @@ void KulbabuHardwareInterface::registerJointLimits(
 
   if (has_soft_limits)  // Use soft limits
   {
-    ROS_INFO_STREAM_NAMED(name_, "Using soft saturation limits");
+    ROS_DEBUG_STREAM_NAMED(name_, "Using soft saturation limits");
     /*
     const joint_limits_interface::PositionJointSoftLimitsHandle soft_handle_position(joint_handle_position,
                                                                                     joint_limits, soft_limits);
@@ -239,7 +239,7 @@ void KulbabuHardwareInterface::registerJointLimits(
   }
   else  // Use saturation limits
   {
-    ROS_INFO_STREAM_NAMED(name_, "Using saturation limits (not soft limits)");
+    ROS_DEBUG_STREAM_NAMED(name_, "Using saturation limits (not soft limits)");
 
     /*
     const joint_limits_interface::PositionJointSaturationHandle sat_handle_position(joint_handle_position, joint_limits);
